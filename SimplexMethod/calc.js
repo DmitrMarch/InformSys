@@ -11,23 +11,31 @@ function madeFuncAndSystem() {
 
     let func_tbl = document.getElementById("function_table"); //таблица функции
     let func_tbl_html = ""; //таблица функции в виде строки
-    let sel_mode = '<select>' + '<option value="max">max</option>' + 
-    '<option value="min">min</option>'; //поле выбора режима в виде строки
-
-    let rstrctns_tbl = document.getElementById("rstrctns_table"); //таблица ограничений как объект DOM
-    let rstrctns_tbl_html = ""; //таблица ограничений в виде строки
 
     func_tbl_html += "<tr>";
 
     for (let i = 0; i < vars_quantity; i++) {
 
-        func_tbl_html += `<td><input type="number" id="x${i + 1}"><td> x${i + 1}`
+        func_tbl_html += `<td><input type="number" id="x${i + 1}"></td><td> x${i + 1}`
 
         if (i + 1 != vars_quantity) {
 
-            func_tbl_html += " + </td></td>";
+            func_tbl_html += " +";
         }
+
+        func_tbl_html += "</td>";
     }
+
+    let sel_mode = '<select id="sm">' + 
+    '<option value="max">max</option>' + 
+    '<option value="min">min</option>' + 
+    '</select>'; //поле выбора режима в виде строки
+
+    func_tbl_html += `<td> ➡ ${sel_mode}</td></tr>`;
+    func_tbl.innerHTML = func_tbl_html;
+
+    let rstrctns_tbl = document.getElementById("rstrctns_table"); //таблица ограничений как объект DOM
+    let rstrctns_tbl_html = ""; //таблица ограничений в виде строки
 
     for (let i = 0; i < rstrctns_quantity; i++) {
 
@@ -35,12 +43,14 @@ function madeFuncAndSystem() {
 
         for (let j = 0; j < vars_quantity; j++) {
             
-            rstrctns_tbl_html += `<td><input type="number" id="${i}-${j}"><td> x${j + 1}`;
+            rstrctns_tbl_html += `<td><input type="number" id="${i}-${j}"></td><td> x${j + 1}`;
 
             if (j + 1 != vars_quantity) {
 
-                rstrctns_tbl_html += " + </td></td>";
+                rstrctns_tbl_html += " +";
             }
+
+            rstrctns_tbl_html += "</td>";
         }
 
         let sel_sign = `<select id="ss${i}">` + 
