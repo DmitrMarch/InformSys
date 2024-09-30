@@ -16,8 +16,6 @@ function madeFuncAndSystem() {
 
     let rstrctns_tbl = document.getElementById("rstrctns_table"); //таблица ограничений как объект DOM
     let rstrctns_tbl_html = ""; //таблица ограничений в виде строки
-    let sel_sign = '<select>' + '<option value="≤">≤</option>' + '<option value="=">=</option>' + 
-    '<option value="≥">≥</option>' + '</select>'; //поле выбора знака в виде строки
 
     func_tbl_html += "<tr>";
 
@@ -44,6 +42,12 @@ function madeFuncAndSystem() {
                 rstrctns_tbl_html += " + </td></td>";
             }
         }
+
+        let sel_sign = `<select id="ss${i}">` + 
+        '<option value="≤">≤</option>' + 
+        '<option value="=">=</option>' + 
+        '<option value="≥">≥</option>' + 
+        '</select>'; //поле выбора знака в виде строки
 
         rstrctns_tbl_html += `<td>${sel_sign}</td><td><input type="number" id="ft${i}"></td></tr>`;
     }
