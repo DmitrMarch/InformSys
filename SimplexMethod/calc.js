@@ -23,15 +23,13 @@ function madeFuncAndSystem() {
 
     for (let i = 0; i < vars_quantity; i++) {
 
-        func_tbl_html += `<td><input type="number" id="x${j + 1}"><td> x${j + 1}`
+        func_tbl_html += `<td><input type="number" id="x${i + 1}"><td> x${i + 1}`
 
-        if (j + 1 != vars_quantity) {
+        if (i + 1 != vars_quantity) {
 
             func_tbl_html += " + </td></td>";
         }
     }
-
-
 
     for (let i = 0; i < rstrctns_quantity; i++) {
 
