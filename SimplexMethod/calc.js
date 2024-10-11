@@ -102,7 +102,30 @@ function simplexSolve() {
     let mode_indx = sel_mode.selectedIndex; //индекс выбранного способа решения
     let mode = sel_mode.options[mode_indx].value; //способ решения
 
-    console.log(xs, sel_signs, free_terms, rstrctns_mtrx, mode);
+    if ((mode == "max") && (sel_signs.indexOf("≥") == -1) && (sel_signs.indexOf("=") == -1)) {
 
-    alert("Ещё в разработке");
+        console.log(xs, sel_signs, free_terms, rstrctns_mtrx, mode);
+
+        for (let i = 0; i < rstrctns_quantity; i++) {
+
+            for (let j = 0; j < vars_quantity + rstrctns_quantity; j++) {
+
+                // if (i == j) {
+                    
+                //     rstrctns_mtrx[i].push(1)
+                // }
+
+                // else {
+
+                //     rstrctns_mtrx[i].push(0)
+                // }
+            }
+        }
+
+        console.log(xs, sel_signs, free_terms, rstrctns_mtrx, mode);
+    }
+
+    else {
+        alert("Ещё в разработке");
+    }
 }
