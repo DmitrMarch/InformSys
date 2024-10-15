@@ -102,30 +102,52 @@ function simplexSolve() {
     let mode_indx = sel_mode.selectedIndex; //индекс выбранного способа решения
     let mode = sel_mode.options[mode_indx].value; //способ решения
 
-    if ((mode == "max") && (sel_signs.indexOf("≥") == -1) && (sel_signs.indexOf("=") == -1)) {
+    if ((mode == "max") && (sel_signs.indexOf("≥") == -1) && 
+        (sel_signs.indexOf("=") == -1) && !free_terms.some(term => term < 0)) {
 
-        console.log(xs, sel_signs, free_terms, rstrctns_mtrx, mode);
+        console.log(structuredClone(xs), sel_signs, free_terms, 
+            structuredClone(rstrctns_mtrx), mode);
 
         for (let i = 0; i < rstrctns_quantity; i++) {
 
-            for (let j = 0; j < vars_quantity + rstrctns_quantity; j++) {
+            xs.push(0);
 
-                // if (i == j) {
+            for (let j = 0; j < rstrctns_quantity; j++) {
+
+                if (i == j) {
                     
-                //     rstrctns_mtrx[i].push(1)
-                // }
+                    rstrctns_mtrx[i].push(1);
+                }
 
-                // else {
+                else {
 
-                //     rstrctns_mtrx[i].push(0)
-                // }
+                    rstrctns_mtrx[i].push(0);
+                }
             }
         }
 
-        console.log(xs, sel_signs, free_terms, rstrctns_mtrx, mode);
+        let deltas = [];
+
+        for (let i = 0; i < xs.length; i++) {
+
+            deltas.push(xs[i] == 0 ? 0 : -1 * xs[i]);
+        }
+
+        let is_optimum = deltas.some(delta => delta < 0);
+
+        console.log(xs, sel_signs, free_terms, rstrctns_mtrx, mode, deltas);
+
+        if (is_optimum) {
+
+            free_terms.forEach(term => {
+                
+                
+            });
+        }
     }
 
     else {
+
         alert("Ещё в разработке");
     }
 }
