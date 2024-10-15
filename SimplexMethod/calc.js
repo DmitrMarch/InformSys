@@ -74,7 +74,7 @@ function simplexSolve() {
 
             for (let i = 0; i < vars_quantity; i++) {
 
-                if (i + 1 < vars_quantity) {
+                if (basis.indexOf(i) == -1) {
 
                     answer.push(0);
                 }

@@ -1,8 +1,8 @@
 var rstrctns_quantity = 0; //количество ограничений
 var vars_quantity = 0; //количество переменных
 
-//динамическое создание функции и системы ограничений в виде таблиц с полями ввода 
-function madeFuncAndSystem() {
+//динамическое создание полей выбора количества ограничений и переменных
+function madeRstrctnsAndVars() {
 
     let sel_vars = my_form.vars; //поле выбора количества переменных
     let options_vars = ""; //опции количества переменных в виде строки
@@ -19,7 +19,16 @@ function madeFuncAndSystem() {
     sel_vars.innerHTML = options_vars;
     sel_rstrctns.innerHTML = options_rstrctns;
 
+    madeFuncAndSystem();
+}
+
+//динамическое создание функции и системы ограничений в виде таблиц с полями ввода 
+function madeFuncAndSystem() {
+
+    let sel_rstrctns = my_form.restrictions; //поле выбора количества ограничений
     let rstrctns_indx = sel_rstrctns.selectedIndex; //индекс выбранного количества ограничений
+
+    let sel_vars = my_form.vars; //поле выбора количества переменных
     let vars_indx = sel_vars.selectedIndex; //индекс выбранного количества переменных
 
     rstrctns_quantity = sel_rstrctns.options[rstrctns_indx].value;
