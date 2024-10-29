@@ -2,7 +2,7 @@
 <html> 
 
 <head> 
-	<title>Решение СЛУ методом Крамера</title>
+	<title>Решение задач симплекс-методом</title>
 	<style>
 		body {
 			background-image: url("back.jpg");
@@ -15,42 +15,40 @@
 			box-shadow: 0 0 10px rgb(0, 0, 0, .7);
 			font-family: Arial;
 			text-align: center;
-			border-radius: 10px;
 		}
 
 		fieldset {
 			padding-top: 20px;
-			border-radius: 10px;
 		}
 
 		table {
 			margin: auto;
 		}
 
-		select {
+		form, fieldset, select, button, input {
 			border-radius: 10px;
 		}
 
 		input {
 			width: 50px;
-			border-radius: 10px;
 		}
 
 		button {
-			border-radius: 10px;
+			font-size: 15px;
 		}
 
 		button:hover {
 			background-color: gainsboro;
 		}
 	</style>
+	<script src="render.js"></script>
 	<script src="calc.js"></script>
 </head> 
 
-<body onload="madeFuncAndSystem()">
+<body onload="madeRstrctnsAndVars()">
 	<form name="my_form">
 		<fieldset>
-			<legend><b>Решение задач симплекс-методом</b></legend>
+			<legend><h2>Решение задач симплекс-методом</h1></legend>
 			<label for="vars">Количество переменных в системе</label>
 			<select name="vars" id="vars" onchange="madeFuncAndSystem()">
 			</select>
@@ -58,32 +56,17 @@
 			<label for="restrictions">Количество ограничений в системе</label>
 			<select name="restrictions" id="restrictions" onchange="madeFuncAndSystem()">
 			</select>
-			<br><br>
-			<table id="function_table"></table>
 			<br>
+			<h3>Функция:</h3>
+			<table id="function_table"></table>
+			<h3>Ограничения:</h3>
 			<table id="rstrctns_table"></table>
 			<br>
-			<button type="button" onclick="simplexSolve()">Решить</button>
+			<button type="button" onclick="simplexSolve()"><b>Решить</b></button>
 			<h3>Результат:</h3> 
 			<p id="result"></p>
 		</fieldset> 
 	</form>
-	<script>
-		let sel_vars = my_form.vars; //поле выбора количества переменных
-		let options_vars = ""; //опции количества переменных в виде строки
-
-		let sel_rstrctns = my_form.restrictions; //поле выбора количества ограничений
-		let options_rstrctns = ""; //опции количества ограничений в виде строки
-
-		for (let i = 1; i < 13; i++) {
-
-			options_vars += `<option value="${i}">${i}</option>`;
-			options_rstrctns += `<option value="${i}">${i}</option>`;
-		}
-
-		sel_vars.innerHTML = options_vars;
-		sel_rstrctns.innerHTML = options_rstrctns;
-	</script>
 </body> 
 
 </html> 
