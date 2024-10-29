@@ -1,58 +1,104 @@
-//динамическое создание функции и системы ограничений в виде таблиц с полями ввода 
-function madeFuncAndSystem() {
+//решение с помощью симплекс-метода
+function simplexSolve() {
 
-    let sel_rstrctns = my_form.restrictions; //поле выбора количества ограничений
-    let rstrctns_indx = sel_rstrctns.selectedIndex; //индекс выбранного количества ограничений
-    let rstrctns_quantity = sel_rstrctns.options[rstrctns_indx].value; //количество ограничений
-
-    let sel_vars = my_form.vars; //поле выбора количества переменных
-    let vars_indx = sel_vars.selectedIndex; //индекс выбранного количества переменных
-    let vars_quantity = sel_vars.options[vars_indx].value; //количество переменных
-
-    let func_tbl = document.getElementById("function_table"); //таблица функции
-    let func_tbl_html = ""; //таблица функции в виде строки
-    let sel_mode = '<select>' + '<option value="max">max</option>' + 
-    '<option value="min">min</option>'; //поле выбора режима в виде строки
-
-    let rstrctns_tbl = document.getElementById("rstrctns_table"); //таблица ограничений как объект DOM
-    let rstrctns_tbl_html = ""; //таблица ограничений в виде строки
-    let sel_sign = '<select>' + '<option value="≤">≤</option>' + '<option value="=">=</option>' + 
-    '<option value="≥">≥</option>' + '</select>'; //поле выбора знака в виде строки
-
-    func_tbl_html += "<tr>";
+    let xs = []; //коэффициенты перед иксами функции
 
     for (let i = 0; i < vars_quantity; i++) {
 
-        func_tbl_html += `<td><input type="number" id="x${j + 1}"><td> x${j + 1}`
-
-        if (j + 1 != vars_quantity) {
-
-            func_tbl_html += " + </td></td>";
-        }
+        xs.push(parseInt(document.getElementById(`x${i + 1}`).valueAsNumber));
     }
 
-
+    let sel_signs = []; //выбранные знаки для каждого ограничения
+    let free_terms = []; //свободные члены системы ограничений
+    let rstrctns_mtrx = []; //матрица коэффициентов системы ограничений
 
     for (let i = 0; i < rstrctns_quantity; i++) {
 
-        rstrctns_tbl_html += "<tr>";
+        sel_signs.push(document.getElementById(`ss${i}`).value);
+        free_terms.push(parseInt(document.getElementById(`ft${i}`).valueAsNumber));
+
+        let rstrctns_row = []; //строка с коэффициентами системы ограничений
 
         for (let j = 0; j < vars_quantity; j++) {
-            
-            rstrctns_tbl_html += `<td><input type="number" id="${i}-${j}"><td> x${j + 1}`;
 
-            if (j + 1 != vars_quantity) {
+            rstrctns_row.push(parseInt(document.getElementById(`${i}-${j}`).valueAsNumber));
+        }
 
-                rstrctns_tbl_html += " + </td></td>";
+        rstrctns_mtrx.push(rstrctns_row);
+    }
+
+    let sel_mode = document.getElementById("sm"); //поле выбора способа решения
+    let mode_indx = sel_mode.selectedIndex; //индекс выбранного способа решения
+    let mode = sel_mode.options[mode_indx].value; //способ решения
+    let basis = []; //базисные индексы
+
+    if ((mode == "max") && (sel_signs.indexOf("≥") == -1) && 
+        (sel_signs.indexOf("=") == -1) && !free_terms.some(term => term < 0)) {
+
+        console.log(structuredClone(xs), sel_signs, free_terms, 
+            structuredClone(rstrctns_mtrx), mode);
+
+        for (let i = 0; i < rstrctns_quantity; i++) {
+
+            xs.push(0);
+
+            for (let j = 0; j < rstrctns_quantity; j++) {
+
+                if (i == j) {
+                    
+                    basis.push([i, j + rstrctns_quantity * 1]);
+                    rstrctns_mtrx[i].push(1);
+                }
+
+                else {
+
+                    rstrctns_mtrx[i].push(0);
+                }
             }
         }
 
-        rstrctns_tbl_html += `<td>${sel_sign}</td><td><input type="number" id="ft${i}"></td></tr>`;
+        xs.push(0);
+
+        let deltas = [];
+
+        for (let i = 0; i < xs.length; i++) {
+
+            deltas.push(xs[i] == 0 ? 0 : -1 * xs[i]);
+        }
+
+        let is_optimum = !deltas.some(delta => delta < 0);
+
+        console.log(xs, sel_signs, free_terms, rstrctns_mtrx, mode);
+        console.log(deltas, basis);
+
+        let answer = [];
+
+        if (is_optimum) {
+
+            for (let i = 0; i < vars_quantity; i++) {
+
+                if (basis[i].indexOf(i) == -1) {
+
+                    answer.push(0);
+                }
+
+                else {
+
+                    answer.push(free_terms[i]);
+                }
+            }
+        }
+
+        else {
+
+
+        }
+
+        console.log(answer);
     }
 
-    rstrctns_tbl.innerHTML = rstrctns_tbl_html;
-}
+    else {
 
-function simplexSolve() {
-    alert("В разработке");
+        alert("Ещё в разработке");
+    }
 }
