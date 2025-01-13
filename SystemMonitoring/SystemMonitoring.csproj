@@ -8,9 +8,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <COMReference Include="{000204ef-0000-0000-c000-000000000046}">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>6</VersionMajor>
+      <Guid>000204ef-0000-0000-c000-000000000046</Guid>
+    </COMReference>
+    <COMReference Include="{ea544a21-c82d-11d1-a3e4-00a0c90aea82}">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>6</VersionMajor>
+      <Guid>ea544a21-c82d-11d1-a3e4-00a0c90aea82</Guid>
+    </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="OpenTelemetry" Version="1.9.0" />
     <PackageReference Include="OpenTelemetry.Api" Version="1.9.0" />
     <PackageReference Include="SharpAbp.Abp.OpenTelemetry.Exporter.Prometheus.HttpListener" Version="3.5.2" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.1" />
+    <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

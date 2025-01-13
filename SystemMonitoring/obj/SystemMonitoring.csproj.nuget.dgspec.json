@@ -61,6 +61,14 @@
             "SharpAbp.Abp.OpenTelemetry.Exporter.Prometheus.HttpListener": {
               "target": "Package",
               "version": "[3.5.2, )"
+            },
+            "System.Diagnostics.PerformanceCounter": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "System.Management": {
+              "target": "Package",
+              "version": "[8.0.0, )"
             }
           },
           "imports": [
