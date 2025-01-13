@@ -17,9 +17,9 @@ class Program
     static float s_memAvailableGB;
     static float s_memUsageGB;
 
-    static float s_discTotalGB = 500;
-    static float s_discAvailableGB;
-    static float s_discUsageGB;
+    static double s_discTotalGB = 500;
+    static double s_discAvailableGB;
+    static double s_discUsageGB;
 
     static public void GetCpuInfo(ref double cpuClockSpeed, ref string cpuName, 
         ref int cpuNumberOfCores)
@@ -39,6 +39,27 @@ class Program
         {
             return Convert.ToInt32(ramMonitor["TotalVisibleMemorySize"]) / (1024 * 1024);
         }
+    }
+
+    static void GetDiscSizeGB(ref double totalSize, ref double freeSize)
+    {
+        double gigabyte = Math.Pow(1024, 3);
+        long total_size_bytes = 0;
+        long free_size_bytes = 0;
+
+        DriveInfo[] all_discs = DriveInfo.GetDrives();
+
+        foreach (DriveInfo d in all_discs)
+        {
+            if (d.IsReady == true)
+            {
+                total_size_bytes += d.TotalSize;
+                free_size_bytes += d.TotalFreeSpace;
+            }
+        }
+
+        totalSize = Math.Round(total_size_bytes / gigabyte, 1);
+        freeSize = Math.Round(free_size_bytes / gigabyte, 1);
     }
 
     static void Main(string[] args)
@@ -88,7 +109,7 @@ class Program
         //метрика свободного места на диске
         s_meter.CreateObservableGauge(
             name: "disc-available",
-            () => new Measurement<float>(
+            () => new Measurement<double>(
                 s_discAvailableGB,
                 new List<KeyValuePair<string, object?>>()
                 {
@@ -101,7 +122,7 @@ class Program
         //метрика занятого места на диске
         s_meter.CreateObservableGauge(
             name: "disc-usage",
-            () => new Measurement<float>(
+            () => new Measurement<double>(
                 s_discUsageGB,
                 new List<KeyValuePair<string, object?>>()
                 {
@@ -138,6 +159,7 @@ class Program
         Console.WriteLine("Нажмите любую клавишу, чтобы завершить все дочерние процессы...");
 
         GetCpuInfo(ref s_cpuClockSpeed, ref s_cpuName, ref s_cpuNumberOfCores);
+        GetDiscSizeGB(ref s_discTotalGB, ref s_discAvailableGB);
 
         PerformanceCounter cpuCounter;
         PerformanceCounter ramCounter;
@@ -154,7 +176,6 @@ class Program
             s_memAvailableGB = ramCounter.NextValue() / 1024;
             s_memUsageGB = s_memTotalGB - s_memAvailableGB;
 
-            s_discAvailableGB = 100;
             s_discUsageGB = s_discTotalGB - s_discAvailableGB;
         }
 
