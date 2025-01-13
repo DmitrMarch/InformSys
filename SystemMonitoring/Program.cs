@@ -26,7 +26,7 @@ class Program
     {
         using (ManagementObject cpuMonitor = new ManagementObject("Win32_Processor.DeviceID='CPU0'"))
         {
-            cpuName = Convert.ToString(cpuMonitor["Name"]);
+            cpuName = Convert.ToString(cpuMonitor["Name"])!;
             cpuNumberOfCores = Convert.ToInt32(cpuMonitor["NumberOfCores"]);
             cpuClockSpeed = Convert.ToDouble(cpuMonitor["CurrentClockSpeed"]) / 1024;
             cpuClockSpeed = Math.Round(cpuClockSpeed, 2);
