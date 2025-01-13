@@ -9,7 +9,7 @@ class Program
     static Meter s_meter = new("Sys.Monitoring", "1.0.0");
 
     static float s_cpuUsagePct;
-    static double s_cpuClockSpeed = Math.Round(GetCpuSpeedGHz(), 2);
+    static double s_cpuClockSpeed;
     static string s_cpuName = "";
     static int s_cpuNumberOfCores;
 
@@ -21,41 +21,23 @@ class Program
     static float s_discAvailableGB;
     static float s_discUsageGB;
 
-    static public float GetCpuSpeedGHz()
+    static public void GetCpuInfo(ref double cpuClockSpeed, ref string cpuName, 
+        ref int cpuNumberOfCores)
     {
         using (ManagementObject cpuMonitor = new ManagementObject("Win32_Processor.DeviceID='CPU0'"))
         {
-            return (float)(Convert.ToDouble(cpuMonitor["CurrentClockSpeed"])) / 1024;
-        }
-    }
-
-    static public void GetCpuInfo(ref string cpuName, ref int cpuNumberOfCores)
-    {
-        using (ManagementClass myManagementClass = new ManagementClass("Win32_Processor"))
-        {
-            ManagementObjectCollection myManagementCollection = myManagementClass.GetInstances();
-
-            foreach (var obj in myManagementCollection)
-            {
-                cpuName = Convert.ToString(obj.Properties["Name"].Value);
-                cpuNumberOfCores = Convert.ToInt32(obj.Properties["NumberOfCores"].Value);
-            }
+            cpuName = Convert.ToString(cpuMonitor["Name"]);
+            cpuNumberOfCores = Convert.ToInt32(cpuMonitor["NumberOfCores"]);
+            cpuClockSpeed = Convert.ToDouble(cpuMonitor["CurrentClockSpeed"]) / 1024;
+            cpuClockSpeed = Math.Round(cpuClockSpeed, 2);
         }
     }
 
     static float GetTotalRamGB()
     {
-        using (ManagementObjectSearcher ramMonitor = new ManagementObjectSearcher(
-            "SELECT TotalVisibleMemorySize " + "FROM Win32_OperatingSystem"))
+        using (ManagementObject ramMonitor = new ManagementObject("Win32_OperatingSystem=@"))
         {
-            float total_ram = 0;
-
-            foreach (ManagementObject objram in ramMonitor.Get())
-            {
-                total_ram = Convert.ToInt32(objram["TotalVisibleMemorySize"]) / (1024 * 1024);
-            }
-
-            return total_ram;
+            return Convert.ToInt32(ramMonitor["TotalVisibleMemorySize"]) / (1024 * 1024);
         }
     }
 
@@ -136,14 +118,14 @@ class Program
                 .Build();
 
         //запускаем Прометея
-        Directory.SetCurrentDirectory("D:\\Software\\prometheus-2.53.2.windows-amd64");
+        Directory.SetCurrentDirectory("D:\\Software\\Prometheus");
         Process prometheus = new Process();
         prometheus.StartInfo.FileName = "prometheus.exe";
         prometheus.StartInfo.UseShellExecute = true;
         prometheus.Start();
 
         //запускаем Графану и открываем её клиент в браузере
-        Directory.SetCurrentDirectory("D:\\Software\\grafana-v11.3.0\\bin");
+        Directory.SetCurrentDirectory("D:\\Software\\Grafana\\bin");
         Process grafana = new Process();
         grafana.StartInfo.FileName = "grafana-server.exe";
         grafana.StartInfo.UseShellExecute = true;
@@ -155,7 +137,7 @@ class Program
 
         Console.WriteLine("Нажмите любую клавишу, чтобы завершить все дочерние процессы...");
 
-        GetCpuInfo(ref s_cpuName, ref s_cpuNumberOfCores);
+        GetCpuInfo(ref s_cpuClockSpeed, ref s_cpuName, ref s_cpuNumberOfCores);
 
         PerformanceCounter cpuCounter;
         PerformanceCounter ramCounter;
