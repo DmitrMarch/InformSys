@@ -17,7 +17,7 @@ class Program
     static float s_memAvailableGB;
     static float s_memUsageGB;
 
-    static double s_discTotalGB = 500;
+    static double s_discTotalGB;
     static double s_discAvailableGB;
     static double s_discUsageGB;
 
@@ -176,6 +176,7 @@ class Program
             s_memAvailableGB = ramCounter.NextValue() / 1024;
             s_memUsageGB = s_memTotalGB - s_memAvailableGB;
 
+            GetDiscSizeGB(ref s_discTotalGB, ref s_discAvailableGB);
             s_discUsageGB = s_discTotalGB - s_discAvailableGB;
         }
 
