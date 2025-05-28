@@ -216,6 +216,11 @@ class Program
 
                 foreach (Process proc in local_all)
                 {
+                    if (proc.ProcessName == "")
+                    {
+                        continue;
+                    }
+
                     s_processId = proc.Id;
                     s_processName = proc.ProcessName;
 
