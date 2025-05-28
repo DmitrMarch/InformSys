@@ -11,3 +11,5 @@ build_property.RootNamespace = SystemMonitoring
 build_property.ProjectDir = D:\Codes\VS-2022-Projects\InformSys\SystemMonitoring\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.EffectiveAnalysisLevelStyle = 8.0
+build_property.EnableCodeStyleSeverity = 
