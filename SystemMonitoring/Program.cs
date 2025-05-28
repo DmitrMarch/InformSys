@@ -3,6 +3,7 @@ using OpenTelemetry.Metrics;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Management;
+using System.Threading;
 
 class Program
 {
@@ -21,6 +22,11 @@ class Program
     static double s_discAvailableGB;
     static double s_discUsageGB;
 
+    static string s_processName = "";
+    static int s_processId;
+    static float s_processCpu;
+    static float s_processMemMB;
+
     static public void GetCpuInfo(ref double cpuClockSpeed, ref string cpuName, 
         ref int cpuNumberOfCores)
     {
@@ -37,7 +43,9 @@ class Program
     {
         using (ManagementObject ramMonitor = new ManagementObject("Win32_OperatingSystem=@"))
         {
-            return Convert.ToInt32(ramMonitor["TotalVisibleMemorySize"]) / (1024 * 1024);
+            float total_ram_gb = (float)Convert.ToInt32(ramMonitor["TotalVisibleMemorySize"]) / 
+                (1024 * 1024);
+            return (float)Math.Round(total_ram_gb, 1);
         }
     }
 
@@ -58,11 +66,11 @@ class Program
             }
         }
 
-        totalSize = Math.Round(total_size_bytes / gigabyte, 1);
-        freeSize = Math.Round(free_size_bytes / gigabyte, 1);
+        totalSize = Math.Round((double)total_size_bytes / gigabyte, 1);
+        freeSize = Math.Round((double)free_size_bytes / gigabyte, 1);
     }
 
-    static void Main(string[] args)
+    static void Main()
     {
         //метрика текущей нагрузки ЦП
         s_meter.CreateObservableGauge(
@@ -132,8 +140,34 @@ class Program
             unit: "GB",
             description: "Real-time disc usage");
 
+        //метрика нагрузки процесса на ЦП
+        s_meter.CreateObservableGauge(
+            name: "process-cpu-usage",
+            () => new Measurement<float>(
+                s_processCpu,
+                new List<KeyValuePair<string, object?>>()
+                {
+                    new ("process_id", s_processId),
+                    new ("process_name", s_processName)
+                }),
+            unit: "percentages",
+            description: "Real-time running process");
+
+        //метрика памяти, занятой процессом
+        s_meter.CreateObservableGauge(
+            name: "process-memory-usage",
+            () => new Measurement<float>(
+                s_processMemMB,
+                new List<KeyValuePair<string, object?>>()
+                {
+                    new ("process_id", s_processId),
+                    new ("process_name", s_processName)
+                }),
+            unit: "MB",
+            description: "Real-time running process");
+
         //используем конечную точку метрик Прометея на порту 9184
-        using MeterProvider meterProvider = Sdk.CreateMeterProviderBuilder()
+        using MeterProvider meter_provider = Sdk.CreateMeterProviderBuilder()
                 .AddMeter("Sys.Monitoring")
                 .AddPrometheusHttpListener(options => options.UriPrefixes = new string[] { "http://localhost:9184/" })
                 .Build();
@@ -156,28 +190,54 @@ class Program
         browser.StartInfo.UseShellExecute = true;
         browser.Start();
 
+        //получаем постоянные системные данные
+        GetCpuInfo(ref s_cpuClockSpeed, ref s_cpuName, ref s_cpuNumberOfCores);
+
         Console.WriteLine("Нажмите любую клавишу, чтобы завершить все дочерние процессы...");
 
-        GetCpuInfo(ref s_cpuClockSpeed, ref s_cpuName, ref s_cpuNumberOfCores);
-        GetDiscSizeGB(ref s_discTotalGB, ref s_discAvailableGB);
-
-        PerformanceCounter cpuCounter;
-        PerformanceCounter ramCounter;
-        cpuCounter = new PerformanceCounter("Процессор", "% загруженности процессора", "_Total");
-        ramCounter = new PerformanceCounter("Память", "Доступно МБ");
-
-        //обновляем метрики каждую секунду
-        while (!Console.KeyAvailable)
+        using (PerformanceCounter cpu_counter = new("Processor", "% Processor Time", "_Total"),
+            ram_counter = new("Memory", "Available MBytes"))
         {
-            Thread.Sleep(1000);
 
-            s_cpuUsagePct = cpuCounter.NextValue();
+            //обновляем метрики каждую секунду
+            while (!Console.KeyAvailable)
+            {
+                Thread.Sleep(1000);
 
-            s_memAvailableGB = ramCounter.NextValue() / 1024;
-            s_memUsageGB = s_memTotalGB - s_memAvailableGB;
+                s_cpuUsagePct = cpu_counter.NextValue();
 
-            GetDiscSizeGB(ref s_discTotalGB, ref s_discAvailableGB);
-            s_discUsageGB = s_discTotalGB - s_discAvailableGB;
+                s_memAvailableGB = ram_counter.NextValue() / 1024;
+                s_memUsageGB = s_memTotalGB - s_memAvailableGB;
+
+                GetDiscSizeGB(ref s_discTotalGB, ref s_discAvailableGB);
+                s_discUsageGB = s_discTotalGB - s_discAvailableGB;
+
+                Process[] local_all = Process.GetProcesses();
+
+                foreach (Process proc in local_all)
+                {
+                    s_processId = proc.Id;
+                    s_processName = proc.ProcessName;
+
+                    try
+                    {
+                        using (PerformanceCounter process_cpu = new("Process", "% Processor Time", s_processName), 
+                            process_ram = new("Process", "Working Set - Private", s_processName))
+                        {
+
+                            process_cpu.NextValue();
+                            process_ram.NextValue();
+
+                            s_processCpu = process_cpu.NextValue() / Environment.ProcessorCount;
+                            s_processMemMB = process_ram.NextValue() / (1024 * 1024);
+                        }
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
         }
 
         //убиваем процессы Прометея и Графаны
