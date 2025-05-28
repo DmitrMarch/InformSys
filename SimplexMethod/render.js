@@ -1,5 +1,5 @@
-var rstrctns_quantity = 0; //количество ограничений
-var vars_quantity = 0; //количество переменных
+var rstrctns_count = 0; //количество ограничений
+var vars_count = 0; //количество переменных
 
 //динамическое создание полей выбора количества ограничений и переменных
 function madeRstrctnsAndVars() {
@@ -31,19 +31,19 @@ function madeFuncAndSystem() {
     let sel_vars = my_form.vars; //поле выбора количества переменных
     let vars_indx = sel_vars.selectedIndex; //индекс выбранного количества переменных
 
-    rstrctns_quantity = sel_rstrctns.options[rstrctns_indx].value;
-    vars_quantity = sel_vars.options[vars_indx].value;
+    rstrctns_count = sel_rstrctns.options[rstrctns_indx].value;
+    vars_count = sel_vars.options[vars_indx].value;
 
     let func_tbl = document.getElementById("function_table"); //таблица функции
     let func_tbl_html = ""; //таблица функции в виде строки
 
     func_tbl_html += "<tr>";
 
-    for (let i = 0; i < vars_quantity; i++) {
+    for (let i = 0; i < vars_count; i++) {
 
         func_tbl_html += `<td><input type="number" id="x${i + 1}"></td><td> x${i + 1}`
 
-        if (i + 1 != vars_quantity) {
+        if (i + 1 != vars_count) {
 
             func_tbl_html += " +";
         }
@@ -62,15 +62,15 @@ function madeFuncAndSystem() {
     let rstrctns_tbl = document.getElementById("rstrctns_table"); //таблица ограничений как объект DOM
     let rstrctns_tbl_html = ""; //таблица ограничений в виде строки
 
-    for (let i = 0; i < rstrctns_quantity; i++) {
+    for (let i = 0; i < rstrctns_count; i++) {
 
         rstrctns_tbl_html += "<tr>";
 
-        for (let j = 0; j < vars_quantity; j++) {
+        for (let j = 0; j < vars_count; j++) {
             
             rstrctns_tbl_html += `<td><input type="number" id="${i}-${j}"></td><td> x${j + 1}`;
 
-            if (j + 1 != vars_quantity) {
+            if (j + 1 != vars_count) {
 
                 rstrctns_tbl_html += " +";
             }
