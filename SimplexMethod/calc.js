@@ -1,3 +1,4 @@
+//решить симплекс-методом
 function simplexSolve() {
 
     const result_div = document.getElementById("result");
@@ -41,7 +42,7 @@ function simplexSolve() {
     if (sel_signs.every(s => s === "≤" || s === "=") && !free_terms.some(t => t < 0)) {
 
         let tableau = []; //симплекс таблица
-        let slackCount = 0; //количество дополнительных переменных
+        let slack_count = 0; //количество дополнительных переменных
 
         for (let i = 0; i < rstrctns_count; i++) {
 
@@ -54,7 +55,7 @@ function simplexSolve() {
                     row.push(i === j ? 1 : 0);
                 }
 
-                slackCount++;
+                slack_count++;
             } 
             else if (sel_signs[i] === "=") {
 
@@ -63,18 +64,18 @@ function simplexSolve() {
                     row.push(i === j ? 1 : 0);
                 }
 
-                slackCount++;
+                slack_count++;
             }
 
             row.push(free_terms[i]);
             tableau.push(row);
         }
 
-        let fRow = xs.concat(new Array(slackCount).fill(0)); //строка дельт
+        let f_row = xs.concat(new Array(slack_count).fill(0)); //F-строка дельт
 
-        fRow.push(0);
-        fRow = fRow.map(x => -x);
-        tableau.push(fRow);
+        f_row.push(0);
+        f_row = f_row.map(x => -x);
+        tableau.push(f_row);
 
         let step = 0;
 
@@ -121,7 +122,6 @@ function simplexSolve() {
             }
         }
 
-        addTable(tableau, step, result_div);
         let result_text = "<p><b>Оптимальное решение:</b><br>";
 
         for (let i = 0; i < vars_count; i++) {
@@ -149,13 +149,50 @@ function simplexSolve() {
     }
 }
 
+//добавить базис-таблицу
 function addTable(tableau, step, parent) {
 
-    let html = `<h4>Шаг ${step}</h4><table border="1" cellpadding="5" style="margin: 10px auto;">`;
+    let html = `<h4>Шаг ${step}</h4><table border="1" cellpadding="5" style="margin: 10px auto;"><tr><th>Базис</th>`;
 
-    for (let i = 0; i < tableau.length; i++) {
+    let total_vars = tableau[0].length - 1; //все переменные кроме свободного члена
 
-        html += "<tr>";
+    for (let i = 0; i < vars_count; i++) {
+
+        html += `<th>x${i + 1}</th>`;
+    }
+
+    for (let i = 0; i < total_vars - vars_count; i++) {
+
+        html += `<th>s${i + 1}</th>`;
+    }
+
+    html += `<th>b</th></tr>`;
+
+    for (let i = 0; i < tableau.length - 1; i++) {
+
+        let basis_var = "";
+
+        for (let j = 0; j < total_vars; j++) {
+
+            let col = tableau.map(row => row[j]);
+            let one_index = col.findIndex(x => x === 1);
+
+            if (one_index === i && col.every((v, idx) => idx === i || v === 0)) {
+
+                if (j < vars_count) {
+
+                    basis_var = `x${j + 1}`;
+                } 
+                else {
+
+                    basis_var = `s${j - vars_count + 1}`;
+                }
+
+                break;
+            }
+        }
+
+        html += `<tr><td>${basis_var}</td>`;
 
         for (let j = 0; j < tableau[i].length; j++) {
 
@@ -165,6 +202,15 @@ function addTable(tableau, step, parent) {
         html += "</tr>";
     }
 
-    html += "</table>";
+    html += `<tr><td>Δ</td>`;
+
+    let last_row = tableau[tableau.length - 1];
+
+    for (let j = 0; j < last_row.length; j++) {
+
+        html += `<td>${Math.round(last_row[j] * 1000) / 1000}</td>`;
+    }
+
+    html += "</tr></table>";
     parent.innerHTML += html;
 }
