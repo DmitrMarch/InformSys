@@ -141,7 +141,10 @@ function simplexSolve() {
 //добавить базис-таблицу
 function addTable(tableau, step, parent) {
 
-    let html = `<h4>Шаг ${step}</h4><table border="1" cellpadding="5" style="margin: 10px auto;"><tr><th>Базис</th>`;
+    let html = `<h4>Шаг ${step}</h4>
+    <table border="1" cellpadding="5" style="margin: 10px auto; 
+    border-collapse: separate; border-spacing: 0; border-radius: 10px; background: white;">
+    <tr><th>Базис</th>`;
 
     let total_vars = tableau[0].length - 1; //все переменные кроме свободного члена
 

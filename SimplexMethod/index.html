@@ -1,7 +1,7 @@
-<!DOCTYPE html> 
-<html> 
+<!DOCTYPE html>
+<html>
 
-<head> 
+<head>
 	<title>Решение задач симплекс-методом</title>
 	<style>
 		body {
@@ -25,7 +25,11 @@
 			margin: auto;
 		}
 
-		form, fieldset, select, button, input {
+		form,
+		fieldset,
+		select,
+		button,
+		input {
 			border-radius: 10px;
 		}
 
@@ -40,15 +44,37 @@
 		button:hover {
 			background-color: gainsboro;
 		}
+
+		/* Верхний левый угол */
+		tr:first-child th:first-child {
+			border-top-left-radius: 10px;
+		}
+
+		/* Верхний правый угол */
+		tr:first-child th:last-child {
+			border-top-right-radius: 10px;
+		}
+
+		/* Нижний левый угол */
+		tr:last-child td:first-child {
+			border-bottom-left-radius: 10px;
+		}
+
+		/* Нижний правый угол */
+		tr:last-child td:last-child {
+			border-bottom-right-radius: 10px;
+		}
 	</style>
 	<script src="render.js"></script>
 	<script src="calc.js"></script>
-</head> 
+</head>
 
 <body onload="madeRstrctnsAndVars()">
 	<form name="my_form">
 		<fieldset>
-			<legend><h2>Решение задач симплекс-методом</h1></legend>
+			<legend>
+				<h2>Решение задач симплекс-методом</h1>
+			</legend>
 			<label for="vars">Количество переменных в системе</label>
 			<select name="vars" id="vars" onchange="madeFuncAndSystem()">
 			</select>
@@ -63,10 +89,10 @@
 			<table id="rstrctns_table"></table>
 			<br>
 			<button type="button" onclick="simplexSolve()"><b>Решить</b></button>
-			<h3>Результат:</h3> 
+			<h3>Результат:</h3>
 			<div id="result"></div>
-		</fieldset> 
+		</fieldset>
 	</form>
-</body> 
+</body>
 
-</html> 
+</html>
