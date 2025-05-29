@@ -7,11 +7,10 @@ function simplexSolve() {
     let xs = [];
 
     for (let i = 0; i < vars_count; i++) {
-
         xs.push(parseFloat(document.getElementById(`x${i + 1}`).value));
     }
 
-    let sel_signs = []; //выбранные знаки ограничений 
+    let sel_signs = []; //знаки ограничений
     let free_terms = []; //свободные члены
     let rstrctns_mtrx = []; //матрица ограничений
 
@@ -20,61 +19,40 @@ function simplexSolve() {
         sel_signs.push(document.getElementById(`ss${i}`).value);
         free_terms.push(parseFloat(document.getElementById(`ft${i}`).value));
 
-        let rstrctns_row = [];
+        let row = [];
 
         for (let j = 0; j < vars_count; j++) {
-
-            rstrctns_row.push(parseFloat(document.getElementById(`${i}-${j}`).value));
+            row.push(parseFloat(document.getElementById(`${i}-${j}`).value));
         }
 
-        rstrctns_mtrx.push(rstrctns_row);
+        rstrctns_mtrx.push(row);
     }
 
     let sel_mode = document.getElementById("sm");
-    let mode = sel_mode.options[sel_mode.selectedIndex].value; //способ решения
-
-    if (mode !== "max") {
-
-        alert("Пока не работает");
-        return;
-    }
+    let mode = sel_mode.options[sel_mode.selectedIndex].value; //min или max
 
     if (sel_signs.every(s => s === "≤" || s === "=") && !free_terms.some(t => t < 0)) {
 
-        let tableau = []; //симплекс таблица
-        let slack_count = 0; //количество дополнительных переменных
+        let tableau = []; //симплекс-таблица
+        let slack_count = 0;
 
         for (let i = 0; i < rstrctns_count; i++) {
 
             let row = rstrctns_mtrx[i].slice();
 
-            if (sel_signs[i] === "≤") {
-
-                for (let j = 0; j < rstrctns_count; j++) {
-
-                    row.push(i === j ? 1 : 0);
-                }
-
-                slack_count++;
-            } 
-            else if (sel_signs[i] === "=") {
-
-                for (let j = 0; j < rstrctns_count; j++) {
-
-                    row.push(i === j ? 1 : 0);
-                }
-
-                slack_count++;
+            for (let j = 0; j < rstrctns_count; j++) {
+                row.push(i === j ? 1 : 0);
             }
 
+            slack_count++;
             row.push(free_terms[i]);
             tableau.push(row);
         }
 
-        let f_row = xs.concat(new Array(slack_count).fill(0)); //F-строка дельт
+        let f_row = xs.concat(new Array(slack_count).fill(0)); //строка цели
 
         f_row.push(0);
-        f_row = f_row.map(x => -x);
+        f_row = f_row.map(x => -x); //всегда умножаем на -1
         tableau.push(f_row);
 
         let step = 0;
@@ -84,18 +62,30 @@ function simplexSolve() {
             addTable(tableau, step++, result_div);
 
             let last_row = tableau[tableau.length - 1];
-            let min = Math.min(...last_row.slice(0, -1));
+            let candidates = last_row.slice(0, -1);
+            let pivot_col;
 
-            if (min >= 0) break;
+            if (mode === "max") {
 
-            let pivot_col = last_row.findIndex(v => v === min); //ведущий столбец
+                let min_val = Math.min(...candidates);
+                if (min_val >= 0) break;
+                pivot_col = candidates.findIndex(v => v === min_val);
+
+            } 
+            else {
+
+                let max_val = Math.max(...candidates);
+                if (max_val <= 0) break;
+                pivot_col = candidates.findIndex(v => v === max_val);
+            }
+
             let ratios = tableau.slice(0, -1).map(row => {
 
                 let val = row[pivot_col];
                 return val > 0 ? row[row.length - 1] / val : Infinity;
-            }); //симплекс-соотношения
+            });
 
-            let pivot_row = ratios.indexOf(Math.min(...ratios)); //ведущая строка
+            let pivot_row = ratios.indexOf(Math.min(...ratios));
 
             if (pivot_row === -1 || ratios[pivot_row] === Infinity) {
 
@@ -113,10 +103,10 @@ function simplexSolve() {
             for (let i = 0; i < tableau.length; i++) {
 
                 if (i === pivot_row) continue;
-                let factor = tableau[i][pivot_col]; //значение неведущей строки из ведущего столбца
+
+                let factor = tableau[i][pivot_col];
 
                 for (let j = 0; j < tableau[i].length; j++) {
-
                     tableau[i][j] -= factor * tableau[pivot_row][j];
                 }
             }
@@ -130,21 +120,20 @@ function simplexSolve() {
             let one_index = col.findIndex(x => x === 1);
 
             if (one_index !== -1 && col.every((v, idx) => idx === one_index || v === 0)) {
-
                 result_text += `x${i + 1} = ${tableau[one_index][tableau[0].length - 1]}<br>`;
             } 
             else {
-
                 result_text += `x${i + 1} = 0<br>`;
             }
         }
 
-        result_text += `F = ${tableau[tableau.length - 1][tableau[0].length - 1]}</p>`;
+        let F = tableau[tableau.length - 1][tableau[0].length - 1];
+        result_text += `F = ${mode === "max" ? F : -F}</p>`; //инвертируем знак при min
         result_div.innerHTML += result_text;
-    } 
-    
-    else {
 
+    } 
+    else {
+        
         alert("Поддерживаются только ограничения вида ≤ или = и неотрицательные свободные члены");
     }
 }
