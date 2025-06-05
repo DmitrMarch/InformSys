@@ -173,14 +173,14 @@ class Program
                 .AddPrometheusHttpListener(options => options.UriPrefixes = new string[] { "http://localhost:9184/" })
                 .Build();
 
-        //тестирование логирования
-        Logger.WriteLog("INFO", "Test text");
+        //настройка логирования
+        Logger.Instance.Configure(LogLevel.DEBUG, "app.log", toConsole: true);
+        Logger.Instance.Log(LogLevel.INFO, "Приложение запущено");
 
-        bool flag = false;
+        bool flag = true;
 
         if (flag)
         {
-
             //запускаем Прометея
             Directory.SetCurrentDirectory("D:\\Software\\Prometheus");
             Process prometheus = new Process();
@@ -221,6 +221,12 @@ class Program
                     GetDiscSizeGB(ref s_discTotalGB, ref s_discAvailableGB);
                     s_discUsageGB = s_discTotalGB - s_discAvailableGB;
 
+                    Logger.Instance.Log(LogLevel.INFO, $"Отправлена метрика Memory Total GB: {s_memTotalGB}");
+                    Logger.Instance.Log(LogLevel.INFO, $"Отправлена метрика Memory Available GB: {s_memAvailableGB}");
+                    Logger.Instance.Log(LogLevel.INFO, $"Отправлена метрика Memory Usage GB: {s_memUsageGB}");
+                    Logger.Instance.Log(LogLevel.INFO, $"Отправлена метрика Disc Total GB: {s_discTotalGB}");
+                    Logger.Instance.Log(LogLevel.INFO, $"Отправлена метрика Disc Usage GB: {s_discUsageGB}");
+
                     Process[] local_all = Process.GetProcesses();
 
                     foreach (Process proc in local_all)
@@ -248,9 +254,12 @@ class Program
                         }
                         catch (InvalidOperationException ex)
                         {
-                            Console.WriteLine(ex.Message);
+                            Logger.Instance.Log(LogLevel.WARNING, ex.Message);
                         }
                     }
+
+                    Logger.Instance.Log(LogLevel.INFO, "Отправлены метрики нагрузки программ (процессов) на процессор и память");
+                    Logger.Instance.Log(LogLevel.DEBUG, "Проверка уровня отладки");
                 }
             }
 
@@ -264,7 +273,10 @@ class Program
             grafana.WaitForExit();
             tk.Kill();
 
-            Console.WriteLine("Все дочерние процессы завершены");
+            Logger.Instance.Log(LogLevel.INFO, "Все дочерние процессы завершены");
+
+            //убиваем логирование
+            Logger.Instance.Stop();
         }
     }
 }
