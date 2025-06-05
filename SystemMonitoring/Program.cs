@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Management;
 using System.Threading;
+using MyLogger;
 
 class Program
 {
@@ -172,89 +173,98 @@ class Program
                 .AddPrometheusHttpListener(options => options.UriPrefixes = new string[] { "http://localhost:9184/" })
                 .Build();
 
-        //запускаем Прометея
-        Directory.SetCurrentDirectory("D:\\Software\\Prometheus");
-        Process prometheus = new Process();
-        prometheus.StartInfo.FileName = "prometheus.exe";
-        prometheus.StartInfo.UseShellExecute = true;
-        prometheus.Start();
+        //тестирование логирования
+        Logger.WriteLog("INFO", "Test text");
 
-        //запускаем Графану и открываем её клиент в браузере
-        Directory.SetCurrentDirectory("D:\\Software\\Grafana\\bin");
-        Process grafana = new Process();
-        grafana.StartInfo.FileName = "grafana-server.exe";
-        grafana.StartInfo.UseShellExecute = true;
-        grafana.Start();
-        Process browser = new Process();
-        browser.StartInfo.FileName = "http://localhost:3000";
-        browser.StartInfo.UseShellExecute = true;
-        browser.Start();
+        bool flag = false;
 
-        //получаем постоянные системные данные
-        GetCpuInfo(ref s_cpuClockSpeed, ref s_cpuName, ref s_cpuNumberOfCores);
-
-        Console.WriteLine("Нажмите любую клавишу, чтобы завершить все дочерние процессы...");
-
-        using (PerformanceCounter cpu_counter = new("Processor", "% Processor Time", "_Total"),
-            ram_counter = new("Memory", "Available MBytes"))
+        if (flag)
         {
 
-            //обновляем метрики каждую секунду
-            while (!Console.KeyAvailable)
+            //запускаем Прометея
+            Directory.SetCurrentDirectory("D:\\Software\\Prometheus");
+            Process prometheus = new Process();
+            prometheus.StartInfo.FileName = "prometheus.exe";
+            prometheus.StartInfo.UseShellExecute = true;
+            prometheus.Start();
+
+            //запускаем Графану и открываем её клиент в браузере
+            Directory.SetCurrentDirectory("D:\\Software\\Grafana\\bin");
+            Process grafana = new Process();
+            grafana.StartInfo.FileName = "grafana-server.exe";
+            grafana.StartInfo.UseShellExecute = true;
+            grafana.Start();
+            Process browser = new Process();
+            browser.StartInfo.FileName = "http://localhost:3000";
+            browser.StartInfo.UseShellExecute = true;
+            browser.Start();
+
+            //получаем постоянные системные данные
+            GetCpuInfo(ref s_cpuClockSpeed, ref s_cpuName, ref s_cpuNumberOfCores);
+
+            Console.WriteLine("Нажмите любую клавишу, чтобы завершить все дочерние процессы...");
+
+            using (PerformanceCounter cpu_counter = new("Processor", "% Processor Time", "_Total"),
+                ram_counter = new("Memory", "Available MBytes"))
             {
-                Thread.Sleep(1000);
 
-                s_cpuUsagePct = cpu_counter.NextValue();
-
-                s_memAvailableGB = ram_counter.NextValue() / 1024;
-                s_memUsageGB = s_memTotalGB - s_memAvailableGB;
-
-                GetDiscSizeGB(ref s_discTotalGB, ref s_discAvailableGB);
-                s_discUsageGB = s_discTotalGB - s_discAvailableGB;
-
-                Process[] local_all = Process.GetProcesses();
-
-                foreach (Process proc in local_all)
+                //обновляем метрики каждую секунду
+                while (!Console.KeyAvailable)
                 {
-                    if (proc.ProcessName == "")
-                    {
-                        continue;
-                    }
+                    Thread.Sleep(1000);
 
-                    s_processId = proc.Id;
-                    s_processName = proc.ProcessName;
+                    s_cpuUsagePct = cpu_counter.NextValue();
 
-                    try
+                    s_memAvailableGB = ram_counter.NextValue() / 1024;
+                    s_memUsageGB = s_memTotalGB - s_memAvailableGB;
+
+                    GetDiscSizeGB(ref s_discTotalGB, ref s_discAvailableGB);
+                    s_discUsageGB = s_discTotalGB - s_discAvailableGB;
+
+                    Process[] local_all = Process.GetProcesses();
+
+                    foreach (Process proc in local_all)
                     {
-                        using (PerformanceCounter process_cpu = new("Process", "% Processor Time", s_processName), 
-                            process_ram = new("Process", "Working Set - Private", s_processName))
+                        if (proc.ProcessName == "")
                         {
-
-                            process_cpu.NextValue();
-                            process_ram.NextValue();
-
-                            s_processCpu = process_cpu.NextValue() / Environment.ProcessorCount;
-                            s_processMemMB = process_ram.NextValue() / (1024 * 1024);
+                            continue;
                         }
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        Console.WriteLine(ex.Message);
+
+                        s_processId = proc.Id;
+                        s_processName = proc.ProcessName;
+
+                        try
+                        {
+                            using (PerformanceCounter process_cpu = new("Process", "% Processor Time", s_processName),
+                                process_ram = new("Process", "Working Set - Private", s_processName))
+                            {
+
+                                process_cpu.NextValue();
+                                process_ram.NextValue();
+
+                                s_processCpu = process_cpu.NextValue() / Environment.ProcessorCount;
+                                s_processMemMB = process_ram.NextValue() / (1024 * 1024);
+                            }
+                        }
+                        catch (InvalidOperationException ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
                     }
                 }
             }
+
+            //убиваем процессы Прометея и Графаны
+            prometheus.Kill();
+            Process tk = new Process();
+            tk.StartInfo.FileName = "taskkill.exe";
+            tk.StartInfo.Arguments = "/F /T /IM grafana-server.exe";
+            tk.StartInfo.UseShellExecute = true;
+            tk.Start();
+            grafana.WaitForExit();
+            tk.Kill();
+
+            Console.WriteLine("Все дочерние процессы завершены");
         }
-
-        //убиваем процессы Прометея и Графаны
-        prometheus.Kill();
-        Process tk = new Process();
-        tk.StartInfo.FileName = "taskkill.exe";
-        tk.StartInfo.Arguments = "/F /T /IM grafana-server.exe";
-        tk.StartInfo.UseShellExecute = true;
-        tk.Start();
-        grafana.WaitForExit();
-        tk.Kill();
-
-        Console.WriteLine("Все дочерние процессы завершены");
     }
 }

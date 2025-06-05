@@ -4,6 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemMonitoring", "SystemMonitoring\SystemMonitoring.csproj", "{8E80823A-2CE6-4F49-903B-1C3ED5302600}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A51BE37E-7CF5-4F81-AECD-E50D777839B3} = {A51BE37E-7CF5-4F81-AECD-E50D777839B3}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLogger", "MyLogger\MyLogger.csproj", "{A51BE37E-7CF5-4F81-AECD-E50D777839B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +20,10 @@ Global
 		{8E80823A-2CE6-4F49-903B-1C3ED5302600}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E80823A-2CE6-4F49-903B-1C3ED5302600}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E80823A-2CE6-4F49-903B-1C3ED5302600}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A51BE37E-7CF5-4F81-AECD-E50D777839B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A51BE37E-7CF5-4F81-AECD-E50D777839B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A51BE37E-7CF5-4F81-AECD-E50D777839B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A51BE37E-7CF5-4F81-AECD-E50D777839B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
