@@ -15,7 +15,7 @@ class Program
 
     static void Main()
     {
-        Console.Title = "Log Console (Press 1-5 to change filter, Esc to exit)";
+        Console.Title = "Log Console";
         var pipe = new NamedPipeServerStream("LoggerPipe", PipeDirection.In);
 
         pipe.WaitForConnection();
@@ -25,7 +25,7 @@ class Program
         Thread inputThread = new Thread(ReadKeyInput) { IsBackground = true };
         inputThread.Start();
 
-        Console.WriteLine("Фильтр: " + currentFilter);
+        
 
         while (running)
         {
@@ -50,6 +50,8 @@ class Program
                         };
 
                     Console.WriteLine($"[Конфигурация] Файл: {logFile}, Консоль: {toConsole}");
+                    Console.WriteLine($"Фильтр: {currentFilter}");
+                    Console.WriteLine($"Жмите 1-5 чтобы сменить фильтр, Esc для выхода");
                 }
                 continue;
             }
@@ -83,8 +85,8 @@ class Program
                 default: continue;
             }
 
-            Console.Title = $"Log Console [Filter: {currentFilter}] (1-5 to filter)";
             Console.WriteLine($"[Фильтр обновлён] -> {currentFilter}");
+            Console.WriteLine($"Жмите 1-5 чтобы сменить фильтр, Esc для выхода");
         }
     }
 
